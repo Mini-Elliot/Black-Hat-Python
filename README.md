@@ -59,7 +59,7 @@ Any misuse of the tools is **strictly the responsibility of the user**.
 | Automating Offensive Forensics                           | ❌ Pending    |
 
 ---
-
+```
 ## 📁 Directory Structure (Example)
 Black Hat Python/
 ├── The Network - Basics/
@@ -71,4 +71,4 @@ Black Hat Python/
 │   └── README.md
 ├── LICENSE
 └── README.md
-
+```
