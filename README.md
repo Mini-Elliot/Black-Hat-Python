@@ -30,31 +30,45 @@ Any misuse of the tools is **strictly the responsibility of the user**.
 
 ## 🧰 Tools Being Upgraded
 
-| Category           | Examples                                             |
-|--------------------|------------------------------------------------------|
-| 🖧 Network Tools     | TCP clients, servers, proxies, port scanners         |
-| 🕵️ Recon Tools       | Packet sniffers, ARP spoofers, host scanners         |
-| 🎯 Post Exploitation | Reverse shells, file exfiltrators, keyloggers       |
-| 📡 Web/SSH Tools     | Paramiko automation, browser hijackers              |
+| Category                     | Examples                                                                 |
+| ---------------------------- | ------------------------------------------------------------------------ |
+| 🖧 **Networking Tools**      | TCP clients/servers, socket sniffers, proxies, port scanners             |
+| 🕵️ **Reconnaissance Tools** | Packet sniffers, ARP spoofers, host discovery, network mappers            |
+| 🐍 **Python Automation**     | Burp Proxy plugins, GitHub control, browser scripting                    |
+| 🎯 **Post-Exploitation**     | Reverse shells, file upload/download, keyloggers, persistence mechanisms |
+| 📡 **Web & SSH Tools**       | Paramiko automation, brute-forcers, web interaction tools                |
+| 🧱 **Windows Exploits**      | Privilege escalation, DLL injection, registry backdoors                  |
+| 🧪 **Forensic Evasion**      | Memory dumping, timestamp manipulation, log tampering                    |
+
 
 ---
 
 ## ✅ Upgrade Progress
 
-| Tool                          | Status       |
-|-------------------------------|--------------|
-| TCP Client                    | ✅ Done       |
-| TCP Server                    | ✅ Done       |
-| TCP Proxy                     | ⏳ In Progress|
-| Reverse Shell (Backdoor)      | ✅ Done       |
-| Listener (Command Control)    | ✅ Done       |
-| ARP Spoofing Tool             | ✅ Done       |
-| MAC Changer                   | ✅ Done       |
-| Packet Sniffer                | ❌ Pending    |
-| SSH Bot (Paramiko)            | ✅ Done       |
-| Keylogger                     | ❌ Pending    |
+| Tool                                                     | Status        |
+|----------------------------------------------------------|---------------|
+| The Network: Basics                                      | ⏳ In Progress |
+| The Network: Raw Sockets and Sniffing                    | ❌ Pending    |
+| Owning The Network with Scapy                            | ❌ Pending    |
+| Web Hackery                                              | ❌ Pending    |
+| Extending Burp Proxy                                     | ❌ Pending    |
+| GitHub Command and Control                               | ❌ Pending    |
+| Common Trojaning Tasks on Windows                        | ❌ Pending    |
+| Fun with Internet Explorer                               | ❌ Pending    |
+| Windows Privilege Escalation                             | ❌ Pending    |
+| Automating Offensive Forensics                           | ❌ Pending    |
 
 ---
 
 ## 📁 Directory Structure (Example)
-Will be added soon.
+Black Hat Python/
+├── The Network - Basics/
+│   ├── 01 - tcpclient.py
+│   ├── 02 - udpclient.py
+|   ├── 03 - tcpserver.py
+|   ├── 04 - bhpnet.py
+├── docs/
+│   └── README.md
+├── LICENSE
+└── README.md
+
