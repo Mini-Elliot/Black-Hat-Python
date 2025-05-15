@@ -1,33 +1,65 @@
 import socket
 import threading
 
-bind_ip = "0.0.0.0"
-bind_port = 9999
+# ------------------------
+# Server Configuration
+# ------------------------
+
+BIND_IP = "0.0.0.0"       # Listen on all interfaces
+BIND_PORT = 9999          # Port to bind the server
+
+# ------------------------
+# Start TCP Server
+# ------------------------
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind((BIND_IP, BIND_PORT))
+server.listen(5)  # Max queued connections
 
-server.bind((bind_ip, bind_port))
+print(f"[*] Listening on {BIND_IP}:{BIND_PORT}")
 
-server.listen(5)
 
-print(f"[*] Listening on {bind_ip}:{bind_port}")
+# ------------------------
+# Handle Client Connection
+# ------------------------
 
-#this is our client handling thread
-def handle_client(client_socket):
-    while True:
-        #print what the client sends
-        request = client_socket.recv(1024)
-        if not request:
-            break
-        print(f"[*] Received: {request.decode()}")
-        #send back a packet
-        client_socket.send(b"ACK!")
-    client_socket.close()
+def handle_client(client_socket, address):
+    """
+    Handles incoming client connection in a separate thread.
+    Continuously receives data and sends back an acknowledgment.
+    """
+    print(f"[*] New connection from {address[0]}:{address[1]}")
+    try:
+        while True:
+            request = client_socket.recv(1024)
+            if not request:
+                print(f"[*] Client {address[0]}:{address[1]} disconnected.")
+                break
 
-while True:
-    client, addr = server.accept()
+            print(f"[*] Received from {address[0]}:{address[1]}: {request.decode().strip()}")
+            client_socket.send(b"ACK!")  # Simple response
+
+    except Exception as e:
+        print(f"[!] Error handling client {address[0]}:{address[1]}: {e}")
     
-    print(f"[*] Accept Connection from: {addr[0]}:{addr[1]}")
-    #spin our client thread to handle incoming data
-    client_handler = threading.Thread(target=handle_client, args=(client,))
-    client_handler.start()
+    finally:
+        client_socket.close()
+
+
+# ------------------------
+# Main Server Loop
+# ------------------------
+
+def start_server():
+    """
+    Main loop that accepts incoming connections and spawns a thread
+    for each client.
+    """
+    while True:
+        client_socket, client_address = server.accept()
+        client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
+        client_thread.start()
+
+
+if __name__ == "__main__":
+    start_server()
