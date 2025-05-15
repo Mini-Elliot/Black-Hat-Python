@@ -67,8 +67,6 @@ Black Hat Python/
 │   ├── 02 - udpclient.py
 |   ├── 03 - tcpserver.py
 |   ├── 04 - bhpnet.py
-├── docs/
-│   └── README.md
 ├── LICENSE
 └── README.md
 ```
