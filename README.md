@@ -58,15 +58,3 @@ Any misuse of the tools is **strictly the responsibility of the user**.
 | Windows Privilege Escalation                             | ❌ Pending    |
 | Automating Offensive Forensics                           | ❌ Pending    |
 
----
-```
-## 📁 Directory Structure (Example)
-Black Hat Python/
-├── The Network - Basics/
-│   ├── 01 - tcpclient.py
-│   ├── 02 - udpclient.py
-|   ├── 03 - tcpserver.py
-|   ├── 04 - bhpnet.py
-├── LICENSE
-└── README.md
-```
