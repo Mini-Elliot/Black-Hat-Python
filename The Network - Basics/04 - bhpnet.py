@@ -1,143 +1,136 @@
 import sys
 import socket
-import getopt
+import argparse
 import threading
 import subprocess
-import argparse
 
 
+# Parse command-line arguments
 def get_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--target", dest="target", help="Specify the IP address of target")
-    parser.add_argument("-p", "--port", dest="port", type=int, help="Specify the port for connection")
-    parser.add_argument("-l", "--listen", dest="listen", action="store_true", default=False, help="listen on [host]:[port] for incoming connections")
-    parser.add_argument("-e", "--execute", dest="execute", help="execute the give file upon receiving a connection")
-    parser.add_argument("-c", "--command", dest="command", action="store_true", default=False, help="initialize a shell command")
-    parser.add_argument("-u", "--upload", dest="upload_destination", help="upon receiving connection upload a file and write to [destination]\n\n")
+    parser.add_argument("-t", "--target", dest="target", help="Target IP address")
+    parser.add_argument("-p", "--port", dest="port", type=int, help="Target port")
+    parser.add_argument("-l", "--listen", dest="listen", action="store_true", help="Listen for incoming connections")
+    parser.add_argument("-e", "--execute", dest="execute", help="Execute specified file upon receiving a connection")
+    parser.add_argument("-c", "--command", dest="command", action="store_true", help="Initialize a command shell")
+    parser.add_argument("-u", "--upload", dest="upload_destination", help="Upon receiving connection, upload a file and write to destination")
+
     args = parser.parse_args()
 
-    if not args.target:
-        parser.error(f"[-] Please specify an IP address for target.")
-    elif not args.port:
-        parser.error(f"[-] Please specify a port for connection.")
+    # Basic validation
+    if not args.listen and (not args.target or not args.port):
+        parser.error("[-] You must specify a target and port when not listening.")
+    
     return args
+
 
 args = get_arguments()
 
 
+# Sends data to the target from stdin and receives response
 def client_sender(buffer):
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
     try:
         client.connect((args.target, args.port))
-        if len(buffer):
+
+        if buffer:
             client.send(buffer.encode())
+
+        while True:
+            # Wait for response
+            response = b""
             while True:
-                # Now wait for data back
-                recv_len = 1
-                response = b""
-                while recv_len:
-                    data = client.recv(4096)
-                    recv_len = len(data)
-                    response += data
-                    if recv_len < 4096:
-                        break
-                print(response)
-                # wait for more info
-                buffer = input("") + "\n"
-                #send it off
-                client.send(buffer.encode())
+                data = client.recv(4096)
+                response += data
+                if len(data) < 4096:
+                    break
+            print(response.decode(), end="")
+
+            # Wait for more input
+            buffer = input("") + "\n"
+            client.send(buffer.encode())
+
     except Exception as e:
         print(f"[*] Exception! Exiting. Reason: {e}")
-        # tear down the connection
         client.close()
 
+
+# Executes a shell command and returns output
+def run_command(command):
+    command = command.strip()
+    try:
+        output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
+    except Exception as e:
+        output = f"Failed to execute command.\n{e}".encode()
+    return output
+
+
+# Handles the incoming client request on the server
 def client_handler(client_socket):
-    # check for uploads
-    if len(args.upload_destination):
-        #read all the bytes and return to the destination
-        file_buffer = b""   
-        #keep reading data until none is available
+    # Handle file upload if specified
+    if args.upload_destination:
+        file_buffer = b""
+
+        # Read incoming data
         while True:
             data = client_socket.recv(1024)
             if not data:
                 break
-            else: 
-                file_buffer += data  
-        # Now we take these bytes and try to write them
+            file_buffer += data
+
         try:
-            with open(args.upload_destination, "wb") as file_discriptor:
-                file_discriptor.write(file_buffer)
-                file_discriptor.close()
-        except:
-            client_socket.send(f"Failed to save file {args.upload_destination}".encode()) 
-    #check for command execution
-    if len(args.execute):
-        #run the command
+            with open(args.upload_destination, "wb") as f:
+                f.write(file_buffer)
+            client_socket.send(f"Successfully saved file to {args.upload_destination}\n".encode())
+        except Exception as e:
+            client_socket.send(f"Failed to save file. Error: {e}\n".encode())
+
+    # Handle command execution
+    if args.execute:
         output = run_command(args.execute)
         client_socket.send(output)
-    #now we go to another loop if the command shell is requested
+
+    # Command shell
     if args.command:
         while True:
-            #show a simple prompt
-            client_socket.send(b"<BHP:#> ")
-
-            #now we receive until we see a line feed (enter key)
-            cmd_buffer = ""
-            while "\n" not in cmd_buffer:
-                cmd_buffer += client_socket.recv(1024).decode()
-
-            #send back the response output
-            response = run_command(cmd_buffer)
-
-            #send back the response
-            client_socket.send(response)
+            try:
+                client_socket.send(b"<BHP:#> ")
+                cmd_buffer = ""
+                while "\n" not in cmd_buffer:
+                    cmd_buffer += client_socket.recv(1024).decode()
+                response = run_command(cmd_buffer)
+                client_socket.send(response)
+            except Exception as e:
+                print(f"[*] Command shell error: {e}")
+                break
 
 
-def run_command(command):
-    # trim the new line
-    command = command.strip()
-    # run the command and get the output
-    try:
-        output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
-    except:
-        output = "Failed to execute command \r\n"
-    # send the output back to client
-    return output
-
-
+# Server-side listener
 def server_loop():
-    # if no target is defined, we listen on all interface
-    if not len(args.target):
-        target = "0.0.0.0."
-        
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind((args.target, args.port))
+    target = args.target if args.target else "0.0.0.0"
 
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind((target, args.port))
     server.listen(5)
+
+    print(f"[*] Listening on {target}:{args.port}...")
 
     while True:
         client_socket, addr = server.accept()
-
-        #spin of a thread to handle our new client
+        print(f"[*] Accepted connection from {addr[0]}:{addr[1]}")
         client_thread = threading.Thread(target=client_handler, args=(client_socket,))
         client_thread.start()
 
-def main():
-    #are we going to listen or just send data from stdin?
-    if not args.listen and len(args.target) and args.port > 0:
-        #read in the buffer from the commandline
-        # this will block, so send CTRL-D if not sending input
-        # to stdin
-        buffer = sys.stdin.read()
 
-        #send data off
+# Main function — entry point
+def main():
+    if args.listen:
+        server_loop()
+    else:
+        buffer = sys.stdin.read()
         client_sender(buffer)
 
-        # we are going to listen and potentially
-        # upload things, execute commands, drop a shell back
-        # depending on our command line options above
-        if args.listen:
-            server_loop()
 
 if __name__ == "__main__":
     main()
