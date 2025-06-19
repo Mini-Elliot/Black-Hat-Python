@@ -48,7 +48,7 @@ Any misuse of the tools is **strictly the responsibility of the user**.
 | Tool                                                     | Status        |
 |----------------------------------------------------------|---------------|
 | The Network: Basics                                      | ⏳ In Progress |
-| The Network: Raw Sockets and Sniffing                    | ❌ Pending    |
+| The Network: Raw Sockets and Sniffing                    | ⏳ In Progress |
 | Owning The Network with Scapy                            | ❌ Pending    |
 | Web Hackery                                              | ❌ Pending    |
 | Extending Burp Proxy                                     | ❌ Pending    |
