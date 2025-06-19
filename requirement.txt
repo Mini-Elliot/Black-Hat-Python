@@ -1,0 +1,23 @@
+# Core libraries
+pycryptodome==3.20.0        # Used for RSA, PKCS1_OAEP
+pywin32==306                 # For win32api, win32com, win32con, etc.
+wmi==1.5.1                   # For WMI-based process monitoring
+requests==2.31.0             # Used in web-related trojan comms
+psutil==5.9.8                # Optional, but useful for process info
+
+# For Python keylogging and clipboard access
+pynput==1.7.6                # If not using pyHook
+keyboard==0.13.5             # Alternative for key capture
+
+# HTTP server upgrade
+Flask==3.0.3                 # Optional replacement for old HTTP servers
+
+# Volatility 3 specific tools (not pip installable directly)
+# These must be installed manually (see README):
+# - Volatility 3 from: https://github.com/volatilityfoundation/volatility3
+# - Requires: capstone, pefile, yara-python
+
+# Additional manual tools
+# - Immunity Debugger (manual install)
+# - Volatility 2.6 (legacy use)
+# - PyInstaller (for packaging trojans): pyinstaller==6.6.0
